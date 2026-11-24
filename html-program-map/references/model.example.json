@@ -1,0 +1,92 @@
+{
+  "project": {"name": "Order Desk", "title": "Order Desk program explorer"},
+  "guide": {
+    "title": "From an order to a calculated total",
+    "overview": [
+      "Order Desk accepts an order and calculates its total through a small Python service.",
+      "The source ledger exposes the order record, intake callable, pricing guard, and returned total."
+    ],
+    "evidence": [".architecture/overview.md"],
+    "operating_loop": [
+      {"number": "01", "title": "Accept", "summary": "Receive the order record.",
+       "target": {"type": "subsystem", "id": "intake"}},
+      {"number": "02", "title": "Calculate", "summary": "Check the amount and calculate the total.",
+       "target": {"type": "workflow", "id": "accept-order", "step": 1}}
+    ],
+    "boundaries": [
+      {"label": "Caller", "note": "Supplies the order and receives the total.",
+       "target": {"type": "system", "id": "caller"}}
+    ],
+    "start_here": [
+      {"label": "How is an order accepted?", "note": "Follow the successful path.",
+       "target": {"type": "workflow", "id": "accept-order", "step": 0}},
+      {"label": "Where is the amount checked?", "note": "Inspect pricing and its source evidence.",
+       "target": {"type": "component", "id": "price-order"}}
+    ]
+  },
+  "systems": [
+    {"id": "order-service", "name": "Order service", "kind": "primary",
+     "summary": "Accept orders and calculate totals.", "x": 80, "y": 140},
+    {"id": "caller", "name": "Caller", "kind": "external",
+     "summary": "Supply order records to the public service callable.", "x": 440, "y": 140}
+  ],
+  "subsystems": [
+    {"id": "intake", "name": "Intake", "summary": "Receive orders and delegate pricing.", "x": 80, "y": 140},
+    {"id": "pricing", "name": "Pricing", "summary": "Validate amounts and calculate totals.", "x": 440, "y": 140}
+  ],
+  "components": [
+    {"id": "accept-order", "name": "Order intake", "kind": "module", "subsystem": "intake",
+     "summary": "Forward an order to the pricing callable.",
+     "architecture_source": ".architecture/overview.md", "key_files": ["src/orders/service.py"],
+     "class_rules": [{"file": "^src/orders/service\\.py$", "role": "declares"}]},
+    {"id": "price-order", "name": "Order pricing", "kind": "module", "subsystem": "pricing",
+     "summary": "Own the order shape, amount guard, and total calculation.",
+     "architecture_source": ".architecture/overview.md",
+     "key_files": ["src/orders/models.py", "src/orders/pricing.py"],
+     "class_rules": [{"file": "^src/orders/(models|pricing)\\.py$", "role": "declares"}]}
+  ],
+  "system_edges": [
+    {"id": "caller-to-service", "level": "system", "from": "caller", "to": "order-service",
+     "label": "Submit order", "trigger": "Caller invokes accept_order",
+     "mechanism": "Direct Python call", "payload": ["Order"],
+     "guarantees": ["The callable forwards the supplied record."], "hazards": ["Negative amounts raise ValueError."],
+     "evidence": ["src/orders/service.py:5"], "freshness": "current"}
+  ],
+  "subsystem_edges": [
+    {"id": "intake-to-pricing", "level": "subsystem", "from": "intake", "to": "pricing",
+     "label": "Calculate total", "trigger": "Order accepted", "mechanism": "Direct Python call",
+     "payload": ["Order"], "guarantees": ["A successful call returns a total."],
+     "hazards": ["Pricing can reject the amount."], "evidence": ["src/orders/service.py:6"], "freshness": "current"}
+  ],
+  "component_edges": [
+    {"id": "accept-to-price", "level": "component", "from": "accept-order", "to": "price-order",
+     "label": "Price order", "trigger": "accept_order(order)", "mechanism": "calculate_total(order)",
+     "payload": ["Order"], "guarantees": ["The result is returned to the caller."],
+     "hazards": ["Exceptions propagate to the caller."], "evidence": ["src/orders/service.py:6"], "freshness": "current"}
+  ],
+  "workflows": [
+    {
+      "id": "accept-order", "name": "Accept and price an order",
+      "summary": "Follow a nonnegative order amount through intake and pricing.",
+      "status": "source-backed happy path",
+      "touched": {
+        "systems": ["caller", "order-service"], "subsystems": ["intake", "pricing"],
+        "components": ["accept-order", "price-order"], "classes": ["src/orders/models.py:1:Order"],
+        "symbols": ["src/orders/service.py:5:accept_order", "src/orders/pricing.py:4:calculate_total"]
+      },
+      "steps": [
+        {"id": "accept", "title": "Accept the order", "kind": "function",
+         "summary": "Forward the order record to pricing.", "symbol": "src/orders/service.py:5:accept_order",
+         "subsystems": ["intake"], "components": ["accept-order"], "input": ["Order"],
+         "condition": "A caller supplies an order record.", "effect": "Invoke calculate_total(order).",
+         "output": ["total"], "objects": ["Order", "total"], "source": "src/orders/service.py:5-6"},
+        {"id": "calculate", "title": "Calculate the total", "kind": "function",
+         "summary": "Check the amount and apply the calculation.", "symbol": "src/orders/pricing.py:4:calculate_total",
+         "subsystems": ["pricing"], "components": ["price-order"], "input": ["Order"],
+         "condition": "The order amount is nonnegative.", "source_guard": "order.amount < 0",
+         "effect": "Multiply the amount by 1.05.", "output": ["total"], "objects": ["Order", "total"],
+         "source": "src/orders/pricing.py:4-7"}
+      ]
+    }
+  ]
+}

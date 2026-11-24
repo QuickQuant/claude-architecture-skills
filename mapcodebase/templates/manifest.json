@@ -1,0 +1,219 @@
+{
+  "schema_version": "2.0",
+  "skill": "mapcodebase",
+  "skill_version": "{SKILL_VERSION}",
+  "model": "{MODEL_NAME}",
+  "generated_at": "{TIMESTAMP}",
+  "target_dir": "{TARGET_DIR}",
+  "git_hash": "{GIT_HASH}",
+  "head_git_hash": "{GIT_HASH}",
+  "status": "success|partial|failed",
+  "mode": "full|update|focus",
+  "focus": null,
+  "discovery_outputs": {
+    "entry_points": ".work/discovery/entry-points.md",
+    "data_flow": ".work/discovery/data-flow.md",
+    "control_flow": ".work/discovery/control-flow.md",
+    "dependencies": ".work/discovery/dependencies.md",
+    "contracts": ".work/discovery/contracts.md"
+  },
+  "commit_distance_from_scan": 0,
+  "dirty_worktree": false,
+  "changed_files_since_scan": [],
+  "changed_components_since_scan": [],
+  "changed_boundary_contracts_since_scan": [],
+  "freshness_status": "fresh|caution|stale",
+  "freshness": {
+    "map_git_hash": "{GIT_HASH}"
+  },
+  "compact_manifest": "manifest.md",
+  "trust_notes": [
+    "Fresh = current HEAD with no relevant drift",
+    "Caution = current docs exist but git/worktree drift touches mapped areas",
+    "Stale = regenerate with /mapcodebase before treating docs as authoritative"
+  ],
+  "access_paths": {
+    "general_primer": {
+      "entrypoint": "primer.md",
+      "fallback_docs": ["INDEX.md", "overview.md"]
+    },
+    "actionable_concerns": {
+      "entrypoint": "concerns.md",
+      "selection_rule": "Read when deciding what to fix first, what architecture debt matters most, or what to validate with downstream review tools"
+    },
+    "plan_evaluation": {
+      "base_docs": ["primer.md", "INDEX.md"],
+      "escalation_docs": ["concerns.md", "structured/cross-references.md", "structured/components/{component-slug}.md"],
+      "selection_rule": "Match plan file paths, module names, and keywords against components[].key_files and components[].intent_tags"
+    },
+    "component_deep_dive": {
+      "base_docs": ["primer.md", "overview.md"],
+      "component_doc_glob": "structured/components/*.md",
+      "component_doc_paths_source": "components[].doc_path",
+      "flow_doc": "structured/flows.md",
+      "selection_rule": "Select generated and tracked component paths only from components[].doc_path. Enumerate component_doc_glob only for an exact-set integrity check; never infer active membership from it. Any expected/actual mismatch is non-success. Retain unknown extras for explicit future reconciliation; never silently delete them. Read the selected component doc first, then query the Current Flow Index only if the task crosses component boundaries"
+    },
+    "targeted_manifest": {
+      "entrypoint": "manifest.md",
+      "selection_rule": "Use the bundled architecture_access.py manifest-section command to load one named registry; do not load full manifest.json merely to obtain one array"
+    }
+  },
+  "components": [
+    {
+      "id": "{component-slug}",
+      "name": "{Component Name}",
+      "purpose": "{one-line}",
+      "entry_file": "{file}:{line}",
+      "key_files": ["{file1}", "{file2}"],
+      "doc_path": "structured/components/{component-slug}.md",
+      "intent_tags": ["{tag1}", "{tag2}"],
+      "runtime_status": "implemented|partial|disabled",
+      "architecture_status": "active_primary|active_fallback|legacy_active|target_only|deprecated",
+      "active_consumers": ["{page-or-route}", "{service}"],
+      "legacy_consumers": ["{legacy-caller}"]
+    }
+  ],
+  "metrics": {
+    "files_scanned": 0,
+    "components_identified": 0,
+    "flows_identified": 0,
+    "entry_points_identified": 0,
+    "explorer_failures": 0,
+    "hazards_identified": 0,
+    "patterns_detected": 0,
+    "patterns_total_tracked": 0,
+    "findings_produced": 0,
+    "findings_total_tracked": 0,
+    "concerns_identified": 0,
+    "concerns_total_tracked": 0,
+    "contracts_identified": 0,
+    "boundary_contracts_identified": 0,
+    "boundary_contracts_documented": 0,
+    "economic_calculation_sites": 1,
+    "economic_labels_tracked": 1,
+    "economic_conflicts_open": 0,
+    "verification_items_open": 0,
+    "answerability_questions": 0,
+    "answerability_pass_rate": null,
+    "access_artifacts_written": 0
+  },
+  "artifacts": [
+    ".work/discovery/entry-points.md",
+    ".work/discovery/data-flow.md",
+    ".work/discovery/control-flow.md",
+    ".work/discovery/dependencies.md",
+    ".work/discovery/contracts.md",
+    "INDEX.md",
+    "primer.md",
+    "access-guide.md",
+    "overview.md",
+    "filesystem-map.md",
+    "concerns.md",
+    "patterns.md",
+    "findings.md",
+    "structured/entry-points.md",
+    "structured/flows.md",
+    "structured/cross-references.md",
+    "manifest.json",
+    "manifest.md"
+  ],
+  "warnings": [],
+  "hazards": [],
+  "patterns": [],
+  "findings": [],
+  "boundary_contracts": [
+    {
+      "id": "{boundary-slug}",
+      "name": "{Producer} → {Consumer} ({payload})",
+      "component": "{component-slug}",
+      "producer": "{file}:{line}",
+      "adapters": ["{file}:{line}"],
+      "consumer": "{file}:{line}",
+      "sink": "{table/store/file or null}",
+      "doc_path": "structured/components/{component-slug}.md#boundary-field-contracts",
+      "fields_total": 0,
+      "fields_unverified": 0,
+      "defect_candidates": ["{field dropped by adapter, etc.}"],
+      "verified_at_git": "{GIT_HASH}"
+    }
+  ],
+  "economic_authority_matrix": [
+    {
+      "id": "economic-site",
+      "label": "{public label}",
+      "aliases": ["{alias}"],
+      "metric_kind": "apr",
+      "roles": ["display"],
+      "component": "{component-slug}",
+      "producer": "{file}:{line}",
+      "consumers": ["{file}:{line}"],
+      "price_side": "unknown",
+      "price_source": "{price source}",
+      "depth_basis": "unknown",
+      "fees_included": "unknown",
+      "fee_schedule": null,
+      "horizon_source": "{horizon source}",
+      "annualization": "unknown",
+      "day_rounding": "unknown",
+      "formula": "{formula}",
+      "formula_version": null,
+      "version_handling": "n/a",
+      "authority_disposition": "unknown",
+      "reconciliation": {
+        "status": "none",
+        "concern_id": null,
+        "evidence": []
+      },
+      "verified_at_git": "{GIT_HASH}"
+    }
+  ],
+  "verification_items": [
+    {
+      "id": "VER-001",
+      "kind": "boundary_contract|invariant|runtime_claim|access_boundary|economic_semantics",
+      "component": "{component-slug}",
+      "boundary": "{boundary-slug or null}",
+      "claim": "{the specific claim that could not be verified this run}",
+      "source_doc": "structured/components/{component-slug}.md",
+      "owner_files": ["{file1}", "{file2}"],
+      "evidence_needed": "{what one would read/run to resolve this}",
+      "severity": "high|medium|low",
+      "created_at_git": "{GIT_HASH}",
+      "last_checked_git": "{GIT_HASH}",
+      "status": "open|resolved|not_modeled",
+      "resolution": null,
+      "next_action": "{concrete verification TODO}"
+    }
+  ],
+  "answerability_tests": [
+    {
+      "question": "{realistic agent question, e.g. what does absent field X mean at boundary Y?}",
+      "expected_docs": ["structured/components/{component-slug}.md"],
+      "answer_status": "answered|unanswered",
+      "evidence_refs": ["{file}:{line}"],
+      "unanswered_reason": null
+    }
+  ],
+  "concerns": [
+    {
+      "concern_id": "CON-001",
+      "priority": "now|next|later",
+      "severity": "warning|error",
+      "component": "{component-slug}",
+      "title": "{short title}",
+      "summary": "{why this matters}",
+      "recommended_action": "{concrete next step}",
+      "files": ["{file1}", "{file2}"],
+      "source_refs": ["HAZ-001", "pattern-id", "FIND-001"],
+      "confidence": "high|medium|low"
+    }
+  ],
+  "exclusions": [
+    ".git/", "node_modules/", ".venv/", "dist/", "__pycache__/"
+  ],
+  "previous_run": {
+    "git_hash": null,
+    "timestamp": null,
+    "skill_version": null
+  }
+}
